@@ -35,8 +35,23 @@ Prompts for a filename, opens the sketch with capture params, records the canvas
     -- out_dir = "out",
     -- open_after = false,
   },
+  keys = {
+    {
+      "<leader>pr",
+      function()
+        local opts = {}
+        if vim.v.count > 0 then
+          opts.seconds = vim.v.count
+        end
+        require("p5render").render(opts)
+      end,
+      desc = "Render p5 sketch [count=seconds]",
+    },
+  },
 }
 ```
+
+`3<leader>pr` records for 3 seconds; bare `<leader>pr` uses the configured default.
 
 `plugin/p5render.lua` registers `:P5Render` with defaults. Calling `setup()` / lazy `opts` again is safe (`force = true`).
 
