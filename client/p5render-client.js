@@ -111,7 +111,7 @@ export function recordNow(options = {}) {
  * }} cfg
  */
 async function runCapture(cfg) {
-  showBanner(`p5render: recording ${cfg.seconds}s…`);
+  showBanner(`p5render: waiting for canvas…`);
 
   const canvas = await waitForCanvas(cfg.getCanvas, 30000);
   if (!canvas) {
@@ -121,7 +121,7 @@ async function runCapture(cfg) {
   }
 
   if (cfg.delay > 0) {
-    await sleep(cfg.delay * 1000);
+    await countdown(cfg.delay, (s) => `p5render: starting in ${s}s…`);
   }
 
   if (typeof MediaRecorder === "undefined") {
@@ -159,9 +159,10 @@ async function runCapture(cfg) {
   );
   rec.start(100);
 
-  await sleep(cfg.seconds * 1000);
+  await countdown(cfg.seconds, (s) => `p5render: recording ${s}s…`);
   if (rec.state !== "inactive") rec.stop();
   await stopped;
+  showBanner("p5render: processing…");
 
   for (const t of stream.getTracks()) t.stop();
 
@@ -253,6 +254,31 @@ function waitForCanvas(getCanvas, timeoutMs) {
     };
     tick();
   });
+}
+
+/**
+ * Tick the banner once per second (ceil remaining) until duration elapses.
+ * @param {number} totalSeconds
+ * @param {(remaining: number) => string} label
+ */
+async function countdown(totalSeconds, label) {
+  const totalMs = Math.max(0, Number(totalSeconds) || 0) * 1000;
+  if (totalMs <= 0) {
+    showBanner(label(0));
+    return;
+  }
+  const end = performance.now() + totalMs;
+  let lastShown = -1;
+  while (true) {
+    const remainingMs = end - performance.now();
+    if (remainingMs <= 0) break;
+    const remaining = Math.max(1, Math.ceil(remainingMs / 1000));
+    if (remaining !== lastShown) {
+      showBanner(label(remaining));
+      lastShown = remaining;
+    }
+    await sleep(Math.min(100, remainingMs));
+  }
 }
 
 function sleep(ms) {
