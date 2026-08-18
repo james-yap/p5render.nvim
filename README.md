@@ -29,7 +29,7 @@ Prompts for a filename, opens the sketch with capture params, records the canvas
   "james-yap/p5render.nvim",
   lazy = false, -- or cmd = { "P5Render" }
   opts = {
-    -- url = "http://127.0.0.1:5173", -- fallback if not found in a :terminal
+    -- url = "http://localhost:5173", -- fallback if not found in a :terminal
     -- seconds = 4,
     -- fps = 60,
     -- out_dir = "out",
@@ -82,13 +82,13 @@ armP5Render();
 3. Confirm the filename (default under `out/` in cwd).
 4. Browser opens the sketch → records → tab closes (macOS) → MP4 written.
 
-URL discovery: parses `http://localhost:<port>` from Neovim **terminal** buffers (Vite’s “Local:” line). Falls back to `http://127.0.0.1:5173`.
+URL discovery: parses `http://localhost:<port>` from Neovim **terminal** buffers (Vite’s “Local:” line). Falls back to `http://localhost:5173`.
 
 ## CLI (without Neovim)
 
 ```bash
 node scripts/record.mjs \
-  --url http://127.0.0.1:5173 \
+  --url http://localhost:5173 \
   --out out/take.mp4 \
   --seconds 4 \
   --fps 60
@@ -115,7 +115,7 @@ WebM in-browser (portable `MediaRecorder` support). ffmpeg always produces MP4.
 
 | Option | Default | |
 |---|---|---|
-| `url` | `http://127.0.0.1:5173` | fallback dev URL |
+| `url` | `http://localhost:5173` | fallback dev URL |
 | `seconds` | `4` | capture length |
 | `fps` | `60` | `captureStream` fps |
 | `timeout` | `120` | max wait for POST |

@@ -1,0 +1,35 @@
+{
+  "name": "p5render.nvim",
+  "version": "0.1.1",
+  "private": false,
+  "description": "Neovim command to record a running p5.js/Vite sketch to MP4",
+  "type": "module",
+  "exports": {
+    "./vite": "./vite/p5render-vite.js",
+    "./vite/p5render-vite.js": "./vite/p5render-vite.js",
+    "./client": "./client/p5render-client.js",
+    "./client/p5render-client.js": "./client/p5render-client.js"
+  },
+  "files": [
+    "client",
+    "vite",
+    "scripts",
+    "lua",
+    "plugin",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/james-yap/p5render.nvim.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "p5",
+    "p5js",
+    "neovim",
+    "vite",
+    "ffmpeg",
+    "recording"
+  ]
+}

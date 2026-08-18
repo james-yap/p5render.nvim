@@ -8,6 +8,7 @@
  *
  * vite.config.ts:
  *   import p5render from "…/vite/p5render-vite.js";
+ *   // or: import p5render from "p5render.nvim/vite";
  *   export default defineConfig({ plugins: [p5render()] });
  */
 

@@ -4,7 +4,7 @@ local default_config = {
   ---@type string|nil absolute path to scripts/record.mjs; nil = auto next to plugin
   record_script = nil,
   ---@type string default dev server URL if not discovered
-  url = "http://127.0.0.1:5173",
+  url = "http://localhost:5173",
   ---@type number default capture duration (seconds)
   seconds = 4,
   ---@type number captureStream fps
