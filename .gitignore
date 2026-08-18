@@ -1,0 +1,6 @@
+.DS_Store
+*.mp4
+*.webm
+out/
+node_modules/
+.luarc.json
