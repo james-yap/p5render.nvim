@@ -79,6 +79,36 @@ local function timestamp()
   return os.date("%Y%m%d-%H%M%S")
 end
 
+local function short_path(path)
+  return vim.fn.fnamemodify(path, ":~:.")
+end
+
+---Single-line status; scheduled + truncated so default notify avoids hit-enter.
+---@param msg string
+---@param level integer|nil
+local function notify(msg, level)
+  msg = msg:gsub("\n", " "):gsub("%s+", " ")
+  local max = math.max(40, vim.o.columns - 5)
+  if vim.fn.strdisplaywidth(msg) > max then
+    msg = vim.fn.strcharpart(msg, 0, max - 1) .. "…"
+  end
+  vim.schedule(function()
+    vim.notify(msg, level or vim.log.levels.INFO, { title = "p5render" })
+  end)
+end
+
+---@param lines string[]
+---@return string
+local function summarize_lines(lines)
+  for i = #lines, 1, -1 do
+    local line = vim.trim(lines[i] or "")
+    if line ~= "" then
+      return line
+    end
+  end
+  return ""
+end
+
 ---Prompt for filename stem; returns absolute mp4 path or nil if cancelled.
 ---@param name_hint string
 ---@return string|nil
@@ -129,7 +159,7 @@ function M.render(opts)
   opts = opts or {}
   local script = record_script_path()
   if vim.fn.filereadable(script) == 0 then
-    vim.notify("p5render: record script not found: " .. script, vim.log.levels.ERROR)
+    notify("p5render: record script not found: " .. short_path(script), vim.log.levels.ERROR)
     return
   end
 
@@ -143,18 +173,15 @@ function M.render(opts)
     local hint = opts.name or (config.default_name .. "-" .. timestamp())
     out = prompt_out_path(hint)
     if not out then
-      vim.notify("p5render: cancelled", vim.log.levels.INFO)
+      notify("p5render: cancelled")
       return
     end
   end
 
-  -- clear input line
+  -- leave input()/cmdline state before messaging or starting the job
   vim.cmd("redraw")
 
-  vim.notify(
-    string.format("p5render: recording %s (%ds) → %s", url, seconds, out),
-    vim.log.levels.INFO
-  )
+  notify(string.format("p5render: recording %s (%ds) → %s", url, seconds, short_path(out)))
 
   local cmd = {
     "node",
@@ -193,7 +220,7 @@ function M.render(opts)
     on_exit = function(_, code)
       vim.schedule(function()
         if code == 0 then
-          vim.notify("p5render: wrote " .. out, vim.log.levels.INFO)
+          notify("p5render: wrote " .. short_path(out))
           if config.open_after then
             if vim.fn.has("mac") == 1 then
               vim.fn.jobstart({ "open", out }, { detach = true })
@@ -202,14 +229,18 @@ function M.render(opts)
             end
           end
         else
-          local err = table.concat(stderr, "\n")
-          if err == "" then
-            err = table.concat(stdout, "\n")
+          local detail = summarize_lines(stderr)
+          if detail == "" then
+            detail = summarize_lines(stdout)
           end
-          vim.notify(
-            "p5render: failed (" .. tostring(code) .. ")\n" .. err,
-            vim.log.levels.ERROR
-          )
+          if detail ~= "" then
+            notify(
+              string.format("p5render: failed (%s): %s", tostring(code), detail),
+              vim.log.levels.ERROR
+            )
+          else
+            notify("p5render: failed (" .. tostring(code) .. ")", vim.log.levels.ERROR)
+          end
         end
       end)
     end,
